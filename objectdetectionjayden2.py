@@ -148,4 +148,4 @@ def decode_netout(netout_, obj_thresh, anchors_, image_h, image_w, net_h, net_w)
     return boxes_all
 
 def correct_yolo_boxes(boxes_, image_h, image_w, net_h, net_w):
-    boxes = deepcopy(boxes
+    boxes = deepcopy(boxes)
