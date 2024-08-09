@@ -346,8 +346,8 @@ if device_name != '/device:GPU:0':
   print('No GPU Found! D:')
 else:
   print('Found GPU at: {}'.format(device_name))
-
-!ngrok authtoken 2kQ0AQzLzrbNRYU59PVZ7djzPNA_5EY64ekPsa1tRog2LEfdB # Place Your Authtoken Here (without the #)!
+#put the token right below here
+!ngrok authtoken 2kQ0MRi11P8t2mp4tPVzJjB4XnD_4Ze9SyY1ZPfiVkgr4KtE6
 
 # Commented out IPython magic to ensure Python compatibility.
 # 
