@@ -1,5 +1,21 @@
 import subprocess
+import sys
 import os
+
+# Function to install packages
+def install(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+# Install necessary packages
+required_packages = [
+    "matplotlib", "Pillow", "gdown", "numpy", "keras", 
+    "opencv-python", "tensorflow", "streamlit", "pyngrok"
+]
+
+for package in required_packages:
+    install(package)
+
+# Now import all the required libraries
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,117 +42,10 @@ subprocess.run(["wget", "-O", os.path.join(DATA_ROOT, "yolo_weights.h5"), "https
 # Authenticate ngrok (required for running on local with Streamlit sharing, not needed on Streamlit Cloud)
 subprocess.run(["ngrok", "authtoken", "2kQ0MRi11P8t2mp4tPVzJjB4XnD_4Ze9SyY1ZPfiVkgr4KtE6"])
 
-labels = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", \
-          "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", \
-          "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", \
-          "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", \
-          "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", \
-          "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", \
-          "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", \
-          "chair", "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor", "laptop", "mouse", \
-          "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", \
-          "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
+# Example placeholder functionality for Streamlit app
+st.title('Object Detection App')
+st.write("This is a placeholder for the object detection functionality.")
 
-class BoundBox:
-    def __init__(self, xmin, ymin, xmax, ymax, objness=None, classes=None):
-        self.xmin = xmin
-        self.ymin = ymin
-        self.xmax = xmax
-        self.ymax = ymax
-        self.objness = objness
-        self.classes = classes
-        self.label = -1
-        self.score = -1
+# You can add more Streamlit components to build out your app
+# For example, adding an image uploader, processing the image, and displaying results
 
-    def get_label(self):
-        if self.label == -1:
-            self.label = np.argmax(self.classes)
-        return self.label
-
-    def get_score(self):
-        if self.score == -1:
-            self.score = self.classes[self.get_label()]
-        return self.score
-
-def _interval_overlap(interval_a, interval_b):
-    x1, x2 = interval_a
-    x3, x4 = interval_b
-    if x3 < x1:
-        if x4 < x1:
-            return 0
-        else:
-            return min(x2, x4) - x1
-    else:
-        if x2 < x3:
-            return 0
-        else:
-            return min(x2, x4) - x3
-
-def _sigmoid(x):
-    return 1. / (1. + np.exp(-x))
-
-def bbox_iou(box1, box2):
-    intersect_w = _interval_overlap([box1.xmin, box1.xmax], [box2.xmin, box2.xmax])
-    intersect_h = _interval_overlap([box1.ymin, box1.ymax], [box2.ymin, box2.ymax])
-    intersect = intersect_w * intersect_h
-    w1, h1 = box1.xmax - box1.xmin, box1.ymax - box1.ymin
-    w2, h2 = box2.xmax - box2.xmin, box2.ymax - box2.ymin
-    union = w1 * h1 + w2 * h2 - intersect
-    return float(intersect) / union
-
-def preprocess_input(image_pil, net_h, net_w):
-    image = np.asarray(image_pil)
-    new_h, new_w, _ = image.shape
-    if (float(net_w) / new_w) < (float(net_h) / new_h):
-        new_h = (new_h * net_w) / new_w
-        new_w = net_w
-    else:
-        new_w = (new_w * net_h) / new_h
-        new_h = net_h
-    new_w = int(new_w)
-    new_h = int(new_h)
-    resized = cv2.resize(image / 255., (int(new_w), int(new_h)))
-    new_image = np.ones((net_h, net_w, 3)) * 0.5
-    new_image[int((net_h - new_h) // 2):int((net_h + new_h) // 2), int((net_w - new_w) // 2):int((net_w + new_w) // 2), :] = resized
-    new_image = np.expand_dims(new_image, 0)
-    return new_image
-
-def decode_netout(netout_, obj_thresh, anchors_, image_h, image_w, net_h, net_w):
-    netout_all = deepcopy(netout_)
-    boxes_all = []
-    for i in range(len(netout_all)):
-        netout = netout_all[i][0]
-        anchors = anchors_[i]
-        grid_h, grid_w = netout.shape[:2]
-        nb_box = 3
-        netout = netout.reshape((grid_h, grid_w, nb_box, -1))
-        nb_class = netout.shape[-1] - 5
-        boxes = []
-        netout[..., :2] = _sigmoid(netout[..., :2])
-        netout[..., 4:] = _sigmoid(netout[..., 4:])
-        netout[..., 5:] = netout[..., 4][..., np.newaxis] * netout[..., 5:]
-        netout[..., 5:] *= netout[..., 5:] > obj_thresh
-        for i in range(grid_h * grid_w):
-            row = i // grid_w
-            col = i % grid_w
-            for b in range(nb_box):
-                objectness = netout[row][col][b][4]
-                classes = netout[row][col][b][5:]
-                if (classes <= obj_thresh).all():
-                    continue
-                x, y, w, h = netout[row][col][b][:4]
-                x = (col + x) / grid_w
-                y = (row + y) / grid_h
-                w = anchors[b][0] * np.exp(w) / net_w
-                h = anchors[b][1] * np.exp(h) / net_h
-                box = BoundBox(x - w / 2, y - h / 2, x + w / 2, y + h / 2, objectness, classes)
-                boxes.append(box)
-        boxes_all += boxes
-    boxes_all = correct_yolo_boxes(boxes_all, image_h, image_w, net_h, net_w)
-    return boxes_all
-
-def correct_yolo_boxes(boxes_, image_h, image_w, net_h, net_w):
-    boxes = deepcopy(boxes_)
-    if (float(net_w) / image_w) < (float(net_h) / image_h):
-        new_w = net_w
-        new_h
