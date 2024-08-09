@@ -38,6 +38,9 @@ with HiddenPrints():
     subprocess.run(["wget", "-O", "/content/data/video1.mp4", "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/6.mp4"])
     subprocess.run(["wget", "-O", "/content/data/yolo_weights.h5", "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/yolo.h5"])
 
+# Replace the problematic line with subprocess
+subprocess.run(["ngrok", "authtoken", "2kQ0MRi11P8t2mp4tPVzJjB4XnD_4Ze9SyY1ZPfiVkgr4KtE6"])
+
 labels = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", \
           "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", \
           "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", \
@@ -128,24 +131,3 @@ def decode_netout(netout_, obj_thresh, anchors_, image_h, image_w, net_h, net_w)
         netout[..., 4:] = _sigmoid(netout[..., 4:])
         netout[..., 5:] = netout[..., 4][..., np.newaxis] * netout[..., 5:]
         netout[..., 5:] *= netout[..., 5:] > obj_thresh
-        for i in range(grid_h * grid_w):
-            row = i // grid_w
-            col = i % grid_w
-            for b in range(nb_box):
-                objectness = netout[row][col][b][4]
-                classes = netout[row][col][b][5:]
-                if (classes <= obj_thresh).all():
-                    continue
-                x, y, w, h = netout[row][col][b][:4]
-                x = (col + x) / grid_w
-                y = (row + y) / grid_h
-                w = anchors[b][0] * np.exp(w) / net_w
-                h = anchors[b][1] * np.exp(h) / net_h
-                box = BoundBox(x - w / 2, y - h / 2, x + w / 2, y + h / 2, objectness, classes)
-                boxes.append(box)
-        boxes_all += boxes
-    boxes_all = correct_yolo_boxes(boxes_all, image_h, image_w, net_h, net_w)
-    return boxes_all
-
-def correct_yolo_boxes(boxes_, image_h, image_w, net_h, net_w):
-    boxes = deepcopy(boxes)
