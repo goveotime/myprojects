@@ -1,11 +1,6 @@
 import subprocess
-
-# Install required libraries
-subprocess.run(["pip", "install", "matplotlib", "Pillow", "gdown", "numpy", "keras", "opencv-python", "tensorflow", "streamlit", "pyngrok"])
-
-# Now import all the required libraries
 import os
-import sys
+import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -17,30 +12,18 @@ import tensorflow as tf
 from copy import deepcopy
 import colorsys
 from pyngrok import ngrok
-import streamlit as st
 
-# Suppress print output during installation
-class HiddenPrints:
-    def __enter__(self):
-        self._original_stdout = sys.stdout
-        sys.stdout = open(os.devnull, 'w')
+# Ensure all necessary data is downloaded
+DATA_ROOT = 'data'
+os.makedirs(DATA_ROOT, exist_ok=True)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        sys.stdout.close()
-        sys.stdout = self._original_stdout
+# Download necessary files using wget
+subprocess.run(["wget", "-O", os.path.join(DATA_ROOT, "image.jpg"), "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/image.jpg"])
+subprocess.run(["wget", "-O", os.path.join(DATA_ROOT, "image2.jpg"), "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/image2.jpg"])
+subprocess.run(["wget", "-O", os.path.join(DATA_ROOT, "video1.mp4"), "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/6.mp4"])
+subprocess.run(["wget", "-O", os.path.join(DATA_ROOT, "yolo_weights.h5"), "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/yolo.h5"])
 
-with HiddenPrints():
-    # Prepare data
-    DATA_ROOT = '/content/data'
-    os.makedirs(DATA_ROOT, exist_ok=True)
-
-    # Download necessary files using wget
-    subprocess.run(["wget", "-O", "/content/data/image.jpg", "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/image.jpg"])
-    subprocess.run(["wget", "-O", "/content/data/image2.jpg", "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/image2.jpg"])
-    subprocess.run(["wget", "-O", "/content/data/video1.mp4", "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/6.mp4"])
-    subprocess.run(["wget", "-O", "/content/data/yolo_weights.h5", "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/yolo.h5"])
-
-# Authenticate ngrok
+# Authenticate ngrok (required for running on local with Streamlit sharing, not needed on Streamlit Cloud)
 subprocess.run(["ngrok", "authtoken", "2kQ0MRi11P8t2mp4tPVzJjB4XnD_4Ze9SyY1ZPfiVkgr4KtE6"])
 
 labels = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", \
@@ -148,4 +131,12 @@ def decode_netout(netout_, obj_thresh, anchors_, image_h, image_w, net_h, net_w)
                 h = anchors[b][1] * np.exp(h) / net_h
                 box = BoundBox(x - w / 2, y - h / 2, x + w / 2, y + h / 2, objectness, classes)
                 boxes.append(box)
-        boxes
+        boxes_all += boxes
+    boxes_all = correct_yolo_boxes(boxes_all, image_h, image_w, net_h, net_w)
+    return boxes_all
+
+def correct_yolo_boxes(boxes_, image_h, image_w, net_h, net_w):
+    boxes = deepcopy(boxes_)
+    if (float(net_w) / image_w) < (float(net_h) / image_h):
+        new_w = net_w
+        new_h
