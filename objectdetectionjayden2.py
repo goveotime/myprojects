@@ -347,10 +347,11 @@ if device_name != '/device:GPU:0':
 else:
   print('Found GPU at: {}'.format(device_name))
 #put the token right below here
-#import subprocess
-#subprocess.run(["ngrok", "authtoken", "2kQ0MRi11P8t2mp4tPVzJjB4XnD_4Ze9SyY1ZPfiVkgr4KtE6"])
 
-ngrok authtoken 2kQ0MRi11P8t2mp4tPVzJjB4XnD_4Ze9SyY1ZPfiVkgr4KtE6
+import subprocess
+subprocess.run(["ngrok", "authtoken", "2kQ0MRi11P8t2mp4tPVzJjB4XnD_4Ze9SyY1ZPfiVkgr4KtE6"])
+
+# !ngrok authtoken 2kQ0MRi11P8t2mp4tPVzJjB4XnD_4Ze9SyY1ZPfiVkgr4KtE6
 
 # Commented out IPython magic to ensure Python compatibility.
 # 
