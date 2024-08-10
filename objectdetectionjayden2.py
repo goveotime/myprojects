@@ -38,8 +38,13 @@ with HiddenPrints():
     DATA_ROOT = '/content/data'
     os.makedirs(DATA_ROOT, exist_ok=True)
 
-    pip -q install streamlit
-    pip -q install pyngrok
+    # pip -q install streamlit
+    # pip -q install pyngrok
+
+    import os
+    os.system('pip -q install streamlit')
+    os.system('pip -q install pyngrok')
+
 
     from pyngrok import ngrok
     import streamlit
