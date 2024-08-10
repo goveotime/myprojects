@@ -52,7 +52,18 @@ with HiddenPrints():
     # image_url = 'https://drive.google.com/uc?id=12ZpZ5H0kJIkWk6y4ktGfqR5OTKofL7qw'
     # image_path = os.path.join(DATA_ROOT, 'image.jpg')
     # gdown.download(image_url, image_path, True)
-    wget -O /content/data/image.jpg "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/image.jpg"
+
+    
+    # wget -O /content/data/image.jpg "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/image.jpg"
+
+    import requests
+
+    url = "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/image.jpg"
+    response = requests.get(url)
+
+    # Save the file locally
+    with open("/content/data/image.jpg", "wb") as file:
+        file.write(response.content)
 
     # image2_url = 'https://drive.google.com/uc?id=1_WpFbGEuS2r19UeP6wekbcF0kb-0nH18'
     # image2_path = os.path.join(DATA_ROOT, 'image2.jpg')
