@@ -372,8 +372,9 @@ def launch_website():
     print("Click this link to try your web app:")
     print(tunnel.public_url)
 
-    streamlit run --server.port 80 app.py >/dev/null # Connect to the URL through Port 80 (>/dev/null hides outputs)
-
+    #streamlit run --server.port 80 app.py >/dev/null # Connect to the URL through Port 80 (>/dev/null hides outputs)
+    subprocess.run(['streamlit', 'run', '--server.port', '80', 'app.py'], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    
   except KeyboardInterrupt:
     ngrok.kill()
 
