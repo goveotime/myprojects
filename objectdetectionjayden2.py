@@ -80,7 +80,15 @@ with HiddenPrints():
     # video_url = 'https://drive.google.com/uc?id=1xFGjpzhZVYtNor9hJevvxysGESZJIMDz'
     # video_path = os.path.join(DATA_ROOT, 'video1.mp4')
     # gdown.download(video_url, video_path, True)
-    wget -O /content/data/video1.mp4 "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/6.mp4"
+    
+    # wget -O /content/data/video1.mp4 "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/6.mp4"
+
+    url = "https://storage.googleapis.com/inspirit-ai-data-bucket-1/Data/AI%20Scholars/Sessions%206%20-%2010%20(Projects)/Project%20-%20%20Object%20Detection%20(Autonomous%20Vehicles)/6.mp4"
+    response = requests.get(url)
+
+    # Save the file locally
+    with open("/content/data/video1.mp4", "wb") as file:
+        file.write(response.content)
 
     # model_url = 'https://drive.google.com/uc?id=19XKJWMKDfDlag2MR8ofjwvxhtr9BxqqN'
     # model_path = os.path.join(DATA_ROOT, 'yolo_weights.h5')
