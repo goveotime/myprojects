@@ -1,4 +1,7 @@
-pip install matplotlib
+import subprocess
+
+# Install matplotlib using pip
+subprocess.run(['pip', 'install', 'matplotlib'])
 
 import matplotlib.pyplot as plt
 import os
